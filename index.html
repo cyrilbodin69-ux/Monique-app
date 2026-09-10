@@ -54,14 +54,6 @@
   .bottom-nav.tab-bg-projects { background: color-mix(in srgb, var(--prune-200) 22%, var(--cream)); }
   .bottom-nav.tab-bg-analytics { background: color-mix(in srgb, var(--terracotta-200) 22%, var(--cream)); }
 
-  /* Le logo de la topbar reprend la couleur d'univers du tab affiché — même principe
-     que la nav du bas, pour que la couleur d'écran se retrouve tout en haut aussi. */
-  .topbar-logo-base { fill: var(--indigo-900); transition: fill 0.28s ease; }
-  .topbar-logo-blob { fill: var(--indigo-200); transition: fill 0.28s ease; }
-  .tab-logo-projects .topbar-logo-base { fill: var(--prune-900); }
-  .tab-logo-projects .topbar-logo-blob { fill: var(--prune-200); }
-  .tab-logo-analytics .topbar-logo-base { fill: var(--terracotta-900); }
-  .tab-logo-analytics .topbar-logo-blob { fill: var(--terracotta-200); }
   .nav-item { flex: 1; position: relative; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 3px; height: 46px;
     background: none; border: none; font-size: 10px; font-weight: 600;
@@ -107,7 +99,7 @@
   .drawer-grip:active .drawer-grip-bar { opacity: 0.5; }
   .drawer-wrapper { overflow: hidden; height: 0px; transition: height 0.3s cubic-bezier(0.16,1,0.3,1); }
   .drawer-spacer { height: 14px; }
-  .drawer-card { background: var(--off-white); border-radius: 6px 16px 16px 16px; padding: 4px 14px; }
+  .drawer-card { background: #fff; border-radius: 6px 16px 16px 16px; padding: 4px 14px; }
   .drawer-card .row { padding: 9px 0; border-bottom: 1px solid rgba(32,30,29,0.07); }
   .drawer-card .row:last-child { border-bottom: none; }
   .confirm-btn { margin-right: 8px; }
@@ -374,12 +366,38 @@
   .app-opening { animation: appOpen 0.5s cubic-bezier(0.22,1,0.36,1) both; transform-origin: center center; }
   @keyframes appOpen { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
 
-  /* Le logo apparaît d'abord, puis le nom juste après — un petit temps de reconnaissance
-     avant que le rituel d'ouverture ne s'enclenche, plutôt que les deux d'un coup. */
-  #initialLoader svg { animation: loaderIconIn 0.5s cubic-bezier(0.22,1,0.36,1) both; animation-delay: 0.1s; }
-  #initialLoader span { animation: loaderNameIn 0.5s cubic-bezier(0.22,1,0.36,1) both; animation-delay: 0.55s; }
-  @keyframes loaderIconIn { from { opacity: 0; transform: translateY(6px) scale(0.9); } to { opacity: 0.85; transform: translateY(0) scale(1); } }
-  @keyframes loaderNameIn { from { opacity: 0; transform: translateY(6px) scale(0.9); } to { opacity: 0.4; transform: translateY(0) scale(1); } }
+  /* Trois logos empilés (indigo devant, prune, terracotta) se déploient en éventail
+     puis se replient ; "Monique" n'apparaît qu'au moment du repli et remonte
+     doucement vers sa position finale, pile quand les cartes se referment. */
+  .loader-stack { position: relative; width: 90px; height: 90px; }
+  .loader-stack svg { position: absolute; top: 0; left: 0; }
+  .loader-logo-1 { z-index: 3; }
+  .loader-logo-2 { z-index: 2; }
+  .loader-logo-3 { z-index: 1; }
+  #initialLoader.fan .loader-logo-1 { animation: loaderFan1 2.2s cubic-bezier(0.65,0,0.35,1) both; }
+  #initialLoader.fan .loader-logo-2 { animation: loaderFan2 2.2s cubic-bezier(0.65,0,0.35,1) both; }
+  #initialLoader.fan .loader-logo-3 { animation: loaderFan3 2.2s cubic-bezier(0.65,0,0.35,1) both; }
+  @keyframes loaderFan1 {
+    0%, 15% { transform: translate(0,0) rotate(0deg); }
+    45%, 65% { transform: translate(0, -22px) rotate(0deg); }
+    95%, 100% { transform: translate(0,0) rotate(0deg); }
+  }
+  @keyframes loaderFan2 {
+    0%, 15% { transform: translate(0,0) rotate(0deg); }
+    45%, 65% { transform: translate(-52px, 14px) rotate(-22deg); }
+    95%, 100% { transform: translate(0,0) rotate(0deg); }
+  }
+  @keyframes loaderFan3 {
+    0%, 15% { transform: translate(0,0) rotate(0deg); }
+    45%, 65% { transform: translate(52px, 14px) rotate(22deg); }
+    95%, 100% { transform: translate(0,0) rotate(0deg); }
+  }
+  #initialLoader .loader-name { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.01em; color: var(--ink); opacity: 0; }
+  #initialLoader.fan .loader-name { animation: loaderNameIn 2.2s ease both; }
+  @keyframes loaderNameIn {
+    0%, 65% { opacity: 0; transform: translateY(18px); }
+    100% { opacity: 0.55; transform: translateY(0); }
+  }
   /* Changement d'onglet : le panneau entrant glisse depuis le côté où se trouve
      sa pastille dans la barre du bas (Projets à gauche, Analytique à droite),
      pour que le mouvement du contenu prolonge celui de la nav plutôt que de le contredire. */
@@ -527,13 +545,25 @@
 <div class="halo"></div>
 <div class="device">
   <div class="screen" id="screen"></div>
-  <div id="initialLoader" style="position:absolute; inset:0; z-index:500; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:var(--cream);">
-    <svg width="56" height="56" viewBox="0 0 180 180" style="opacity:0.85;">
-      <defs><clipPath id="loaderIconClip"><path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z"/></clipPath></defs>
-      <path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z" style="fill:var(--indigo-900);"/>
-      <circle cx="150" cy="15" r="68" style="fill:var(--indigo-200);" opacity="0.5" clip-path="url(#loaderIconClip)"/>
-    </svg>
-    <span style="font-family:'Bricolage Grotesque', sans-serif; font-weight:700; font-size:22px; letter-spacing:-0.01em; color:var(--ink); opacity:0.4;">Monique</span>
+  <div id="initialLoader" class="fan" style="position:absolute; inset:0; z-index:500; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px; background:var(--cream);">
+    <div class="loader-stack">
+      <svg class="loader-logo-1" width="90" height="90" viewBox="0 0 180 180">
+        <defs><clipPath id="loaderClip1"><path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z"/></clipPath></defs>
+        <path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z" style="fill:var(--indigo-900);"/>
+        <circle cx="150" cy="15" r="68" style="fill:var(--indigo-200);" opacity="0.5" clip-path="url(#loaderClip1)"/>
+      </svg>
+      <svg class="loader-logo-2" width="90" height="90" viewBox="0 0 180 180">
+        <defs><clipPath id="loaderClip2"><path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z"/></clipPath></defs>
+        <path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z" style="fill:var(--prune-900);"/>
+        <circle cx="150" cy="15" r="68" style="fill:var(--prune-200);" opacity="0.5" clip-path="url(#loaderClip2)"/>
+      </svg>
+      <svg class="loader-logo-3" width="90" height="90" viewBox="0 0 180 180">
+        <defs><clipPath id="loaderClip3"><path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z"/></clipPath></defs>
+        <path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z" style="fill:var(--terracotta-900);"/>
+        <circle cx="150" cy="15" r="68" style="fill:var(--terracotta-200);" opacity="0.5" clip-path="url(#loaderClip3)"/>
+      </svg>
+    </div>
+    <span class="loader-name">Monique</span>
   </div>
 </div>
 
@@ -2201,14 +2231,7 @@ function render() {
   const html = `
     <div class="screen-content">
     <div class="topbar">
-      <span class="app-name" style="display:flex; align-items:center; gap:8px;">
-        <svg class="topbar-logo tab-logo-${s.currentTab}" width="22" height="22" viewBox="0 0 180 180" style="flex-shrink:0;">
-          <defs><clipPath id="topbarLogoClip"><path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z"/></clipPath></defs>
-          <path class="topbar-logo-base" d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z"/>
-          <circle class="topbar-logo-blob" cx="150" cy="15" r="68" opacity="0.5" clip-path="url(#topbarLogoClip)"/>
-        </svg>
-        Monique
-      </span>
+      <span class="app-name">Monique</span>
       <button class="avatar" onclick="setState({activeSheet:'profile'})" aria-label="Profil" style="border:none; cursor:pointer;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="12" cy="8" r="3.5" stroke="#645c50" stroke-width="2"/><path d="M4.5 20c1.5-4.2 5-6 7.5-6s6 1.8 7.5 6" stroke="#645c50" stroke-width="2" stroke-linecap="round"/></svg></button>
     </div>
 
@@ -3921,15 +3944,17 @@ function onDrawerDragEnd(e) {
 render();
 
 // Rituel d'ouverture : l'app est déjà prête sous le loader, mais on laisse volontairement
-// un temps d'arrêt avant de la révéler — sinon l'ouverture n'existe pas vraiment, le
-// tableau de bord est juste "déjà là" dès le premier instant.
+// le temps à l'animation des 3 logos de se dérouler en entier (déploiement puis repli,
+// 2.2s) avant de révéler le tableau de bord — sinon le geste serait coupé en plein élan.
+// +200ms de pause volontaire après la fin du repli : le temps de bien voir le logo
+// et le nom stabilisés ensemble avant que l'ouverture ne s'enclenche.
 setTimeout(() => {
   const loader = document.getElementById('initialLoader');
   const screen = document.getElementById('screen');
   if (loader) loader.classList.add('loader-leaving');
   if (screen) screen.classList.add('app-opening');
   setTimeout(() => { if (loader) loader.remove(); }, 420);
-}, 1400);
+}, 2400);
 </script>
 </body>
 </html>
