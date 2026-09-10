@@ -25,6 +25,24 @@
   .halo { position: absolute; width: 460px; height: 460px; border-radius: 50%; background: radial-gradient(circle, rgba(181,82,46,0.28) 0%, rgba(181,82,46,0) 68%); top: -30px; left: 50%; transform: translateX(-56%); z-index: 0; pointer-events: none; }
   .device { position: relative; z-index: 1; width: 390px; max-width: 100%; border-radius: 40px; overflow: hidden; box-shadow: 0 30px 70px rgba(32,30,29,0.22); background: var(--cream); }
   .screen { height: 780px; position: relative; overflow: hidden; }
+
+  /* Adaptation mobile : plein écran strict sans débordement */
+  @media (max-width: 600px) {
+    body { padding: 0; width: 100%; overflow: hidden; }
+    .device { width: 100%; max-width: 100%; height: 100dvh; border-radius: 0; box-shadow: none; margin: 0; }
+    .screen { height: 100%; }
+    .halo { display: none; }
+    /* Les iPhone à coins d'écran arrondis (14/15/16/17 Pro et suivants) exposent une
+       "safe area" système : sans elle, un élément collé à left:0/right:0/bottom:0 se
+       fait couper en biais par la courbure physique du verre, comme un losange. */
+    .bottom-nav { padding-left: max(10px, env(safe-area-inset-left));
+      padding-right: max(10px, env(safe-area-inset-right));
+      padding-bottom: env(safe-area-inset-bottom);
+      height: calc(66px + env(safe-area-inset-bottom)); }
+    .screen-content { bottom: calc(66px + env(safe-area-inset-bottom)); }
+    .topbar { padding-top: env(safe-area-inset-top); }
+  }
+
   .screen-content { position: absolute; inset: 0; bottom: 66px; overflow-y: auto; padding: 28px 18px 16px; }
   .bottom-nav { position: absolute; left: 0; right: 0; bottom: 0; height: 66px;
     background: var(--cream);
@@ -35,6 +53,15 @@
   .bottom-nav.tab-bg-home { background: color-mix(in srgb, var(--indigo-200) 22%, var(--cream)); }
   .bottom-nav.tab-bg-projects { background: color-mix(in srgb, var(--prune-200) 22%, var(--cream)); }
   .bottom-nav.tab-bg-analytics { background: color-mix(in srgb, var(--terracotta-200) 22%, var(--cream)); }
+
+  /* Le logo de la topbar reprend la couleur d'univers du tab affiché — même principe
+     que la nav du bas, pour que la couleur d'écran se retrouve tout en haut aussi. */
+  .topbar-logo-base { fill: var(--indigo-900); transition: fill 0.28s ease; }
+  .topbar-logo-blob { fill: var(--indigo-200); transition: fill 0.28s ease; }
+  .tab-logo-projects .topbar-logo-base { fill: var(--prune-900); }
+  .tab-logo-projects .topbar-logo-blob { fill: var(--prune-200); }
+  .tab-logo-analytics .topbar-logo-base { fill: var(--terracotta-900); }
+  .tab-logo-analytics .topbar-logo-blob { fill: var(--terracotta-200); }
   .nav-item { flex: 1; position: relative; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 3px; height: 46px;
     background: none; border: none; font-size: 10px; font-weight: 600;
@@ -80,6 +107,9 @@
   .drawer-grip:active .drawer-grip-bar { opacity: 0.5; }
   .drawer-wrapper { overflow: hidden; height: 0px; transition: height 0.3s cubic-bezier(0.16,1,0.3,1); }
   .drawer-spacer { height: 14px; }
+  .drawer-card { background: var(--off-white); border-radius: 6px 16px 16px 16px; padding: 4px 14px; }
+  .drawer-card .row { padding: 9px 0; border-bottom: 1px solid rgba(32,30,29,0.07); }
+  .drawer-card .row:last-child { border-bottom: none; }
   .confirm-btn { margin-right: 8px; }
 
   .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -177,6 +207,8 @@
   .story-tap { flex: 1; }
   .story-content { flex: 1; display: flex; flex-direction: column; justify-content: center;
     padding: 20px 28px; position: relative; z-index: 2; pointer-events: none; }
+  .story-content.card-in { animation: storyContentIn 0.35s ease both; }
+  @keyframes storyContentIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   .story-title { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 26px;
     letter-spacing: -0.01em; margin: 0 0 14px; line-height: 1.15; }
   .story-body { font-size: 15px; line-height: 1.55; margin: 0 0 28px; }
@@ -241,9 +273,10 @@
   /* Rattachement à une enveloppe : volontairement différent des pastilles de catégorie,
      car ce n'est pas une étiquette mais une décision qui modifie le solde. */
   .envelope-toggle { display: flex; align-items: center; gap: 7px; margin-top: 14px;
-    font-size: 12.5px; color: var(--moutarde-900); opacity: 0.85; cursor: pointer;
-    padding: 4px 0; transition: opacity 0.15s ease; }
-  .envelope-toggle:active { opacity: 1; }
+    font-size: 13px; font-weight: 600; color: var(--moutarde-900);
+    background: var(--moutarde-200); border-radius: 6px 16px 16px 16px;
+    padding: 10px 14px; cursor: pointer; transition: opacity 0.15s ease; }
+  .envelope-toggle:active { opacity: 0.85; }
   .envelope-option { display: flex; justify-content: space-between; align-items: center;
     padding: 11px 14px; margin-bottom: 6px; border-radius: 4px 14px 14px 14px;
     background: var(--moutarde-200); color: var(--moutarde-900); font-size: 13px;
@@ -333,6 +366,20 @@
   @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   @keyframes slideDown { from { transform: translateY(0); } to { transform: translateY(100%); } }
+
+  /* Rituel d'ouverture : le loader s'efface pendant que le vrai contenu apparaît
+     par un zoom doux depuis le centre — un vrai geste d'ouverture, pas juste
+     un contenu qui remplace un autre sans transition. */
+  #initialLoader.loader-leaving { animation: fadeOut 0.4s ease forwards; }
+  .app-opening { animation: appOpen 0.5s cubic-bezier(0.22,1,0.36,1) both; transform-origin: center center; }
+  @keyframes appOpen { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+
+  /* Le logo apparaît d'abord, puis le nom juste après — un petit temps de reconnaissance
+     avant que le rituel d'ouverture ne s'enclenche, plutôt que les deux d'un coup. */
+  #initialLoader svg { animation: loaderIconIn 0.5s cubic-bezier(0.22,1,0.36,1) both; animation-delay: 0.1s; }
+  #initialLoader span { animation: loaderNameIn 0.5s cubic-bezier(0.22,1,0.36,1) both; animation-delay: 0.55s; }
+  @keyframes loaderIconIn { from { opacity: 0; transform: translateY(6px) scale(0.9); } to { opacity: 0.85; transform: translateY(0) scale(1); } }
+  @keyframes loaderNameIn { from { opacity: 0; transform: translateY(6px) scale(0.9); } to { opacity: 0.4; transform: translateY(0) scale(1); } }
   /* Changement d'onglet : le panneau entrant glisse depuis le côté où se trouve
      sa pastille dans la barre du bas (Projets à gauche, Analytique à droite),
      pour que le mouvement du contenu prolonge celui de la nav plutôt que de le contredire. */
@@ -470,23 +517,17 @@
   .profile-avatar-edit { position:absolute; bottom:-2px; right:-2px; width:20px; height:20px; border-radius:50%; background:var(--ink); display:flex; align-items:center; justify-content:center; border:2px solid var(--cream); }
   .menu-row { display:flex; align-items:center; gap:12px; padding:13px 2px; cursor:pointer; border-bottom:1px solid rgba(32,30,29,0.08); }
   .menu-row span.label { flex:1; font-size:14px; font-weight:500; }
-  .subpage-title { font-family:'Bricolage Grotesque', sans-serif; font-weight:700; font-size:19px; margin:0 0 16px; }
-.subpage-body p { font-size:14px; line-height:1.55; color:var(--muted); margin:0 0 14px; }
+  .subpage-title { font-family:'Bricolage Grotesque', sans-serif; font-weight:700; font-size:19px; margin:0 0 16px; padding: 0 20px; }
+  .subpage-body { padding: 0 20px; }
+  .subpage-body p { font-size:14px; line-height:1.55; color:var(--muted); margin:0 0 14px; }
   .subpage-body h3 { font-size:14px; font-weight:600; color:var(--ink); margin:18px 0 6px; }
-
-/* Adaptation mobile : plein écran strict sans débordement */
-  @media (max-width: 600px) {
-    body { padding: 0; width: 100%; overflow: hidden; }
-    .device { width: 100%; max-width: 100%; height: 100dvh; border-radius: 0; box-shadow: none; margin: 0; }
-    .screen { height: 100%; }
-    .halo { display: none; }
-  }
 </style>
 </head>
 <body>
 <div class="halo"></div>
-<div class="device"><div class="screen" id="screen">
-  <div id="initialLoader" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;">
+<div class="device">
+  <div class="screen" id="screen"></div>
+  <div id="initialLoader" style="position:absolute; inset:0; z-index:500; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:var(--cream);">
     <svg width="56" height="56" viewBox="0 0 180 180" style="opacity:0.85;">
       <defs><clipPath id="loaderIconClip"><path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z"/></clipPath></defs>
       <path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z" style="fill:var(--indigo-900);"/>
@@ -494,7 +535,7 @@
     </svg>
     <span style="font-family:'Bricolage Grotesque', sans-serif; font-weight:700; font-size:22px; letter-spacing:-0.01em; color:var(--ink); opacity:0.4;">Monique</span>
   </div>
-</div></div>
+</div>
 
 <script>
 const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -1103,6 +1144,7 @@ let lastBlocksOpen = { recurrentes: false, budgets: false, ponctuelles: false, r
 let lastEnvOpen = {};
 let sheetJustOpened = false;
 let lastCurrentTab = 'home';
+let lastStoryIndex = -1;
 const TAB_ORDER = ['projects', 'home', 'analytics'];
 
 function closeSheet() {
@@ -2159,7 +2201,14 @@ function render() {
   const html = `
     <div class="screen-content">
     <div class="topbar">
-      <span class="app-name">Monique</span>
+      <span class="app-name" style="display:flex; align-items:center; gap:8px;">
+        <svg class="topbar-logo tab-logo-${s.currentTab}" width="22" height="22" viewBox="0 0 180 180" style="flex-shrink:0;">
+          <defs><clipPath id="topbarLogoClip"><path d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z"/></clipPath></defs>
+          <path class="topbar-logo-base" d="M6 40 C6 20 20 6 40 6 L140 6 C162 6 174 18 174 40 L174 140 C174 162 162 174 140 174 L40 174 C20 174 6 160 6 140 Z"/>
+          <circle class="topbar-logo-blob" cx="150" cy="15" r="68" opacity="0.5" clip-path="url(#topbarLogoClip)"/>
+        </svg>
+        Monique
+      </span>
       <button class="avatar" onclick="setState({activeSheet:'profile'})" aria-label="Profil" style="border:none; cursor:pointer;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="12" cy="8" r="3.5" stroke="#645c50" stroke-width="2"/><path d="M4.5 20c1.5-4.2 5-6 7.5-6s6 1.8 7.5 6" stroke="#645c50" stroke-width="2" stroke-linecap="round"/></svg></button>
     </div>
 
@@ -2207,8 +2256,8 @@ function render() {
         <button class="welcome-close" onclick="dismissWelcome()" aria-label="Masquer ce guide">${xSvg()}</button>
         <p class="welcome-title">Pour démarrer</p>
         <p class="welcome-text">Indique ce qui rentre et ce qui sort chaque mois. Monique calcule le reste.</p>
-        ${etape(1, faits.revenu, 'Ajouter ton salaire', "highlightThenOpen('incomeTarget', openIncomeManage, {double:true})")}
-        ${etape(2, faits.recurrente, 'Ajouter loyer et abonnements', "scrollDarkenExpandThenOpen('recurrentesTarget', 'recurrentes', 'recurrentesAddRow', openAddRecurrentSheet)")}
+        ${etape(1, faits.revenu, 'Ajouter un revenu récurrent', "highlightThenOpen('incomeTarget', openIncomeManage, {double:true})")}
+        ${etape(2, faits.recurrente, 'Ajouter une dépense récurrente', "scrollDarkenExpandThenOpen('recurrentesTarget', 'recurrentes', 'recurrentesAddRow', openAddRecurrentSheet)")}
         ${etape(3, faits.budget, 'Créer un budget (courses, sorties…)', "scrollDarkenExpandThenOpen('budgetsTarget', 'budgets', 'budgetsAddRow', openAddEnvelopeSheet)")}
       </div>`;
     })()}
@@ -2255,7 +2304,7 @@ function render() {
               <p class="label" style="color: var(--terracotta-900);">À confirmer</p>
               ${aConfirmer.map(d => `<div class="row" style="color: var(--terracotta-900); cursor:pointer;" onclick="openEditRecurrent('${d.id}')"><span>${clockSvg('var(--alert)')}${d.nom}${d.categorie ? ` <span style="opacity:0.7;">· ${d.categorie}</span>` : ''}</span><span class="row-right">${fmt(d.montant)}<button class="confirm-btn" onclick="event.stopPropagation(); confirmItem('${d.id}', this)" aria-label="Confirmer">${checkSvg('#fff')}</button></span></div>`).join('')}
             </div>` : ''}
-          ${confirmees.map(d => `<div class="row strong" data-row-id="${d.id}" style="color: var(--terracotta-900); cursor:pointer;" onclick="openEditRecurrent('${d.id}')"><span>${d.nom}${d.categorie ? ` <span style="opacity:0.6; font-weight:400; font-size:12px;">· ${d.categorie}</span>` : ''}</span><span class="row-right">${fmt(d.montant)}</span></div>`).join('')}
+          ${confirmees.map(d => `<div class="row strong" data-row-id="${d.id}" style="color: var(--terracotta-900); cursor:pointer;" onclick="openEditRecurrent('${d.id}')"><span>${d.nom}${d.categorie ? ` <span style="opacity:0.6; font-weight:400; font-size:12px;">· ${d.categorie}</span>` : ''}</span><span class="row-right">${fmt(d.montant)}${checkSvg('var(--muted)')}</span></div>`).join('')}
           ${aVenir.map(d => `<div class="row muted" style="color: var(--terracotta-900); cursor:pointer;" onclick="openEditRecurrent('${d.id}')"><span>${calendarSvg('var(--muted)')}${d.nom} · le ${effectiveJour(d, m)}${d.categorie ? ` <span style="opacity:0.7;">· ${d.categorie}</span>` : ''}</span><span class="row-right">${fmt(d.montant)}<button class="confirm-btn early" onclick="event.stopPropagation(); confirmItem('${d.id}', this)" aria-label="Confirmer en avance">${checkSvg('currentColor')}</button></span></div>`).join('')}
         </div>
       </div>
@@ -2311,7 +2360,7 @@ function render() {
               <p class="label" style="color: var(--sauge-900);">À confirmer</p>
               ${ponctAConfirmer.map(p => `<div class="row" style="color: var(--sauge-900); cursor:pointer;" onclick="openEditPonctuelle('${p.id}')"><span>${clockSvg('var(--alert)')}${p.nom}${p.categorie ? ` <span style="opacity:0.7;">· ${p.categorie}</span>` : ''}</span><span class="row-right">${fmt(p.amount)}<button class="confirm-btn" onclick="event.stopPropagation(); confirmPonctuelle('${p.id}', this)" aria-label="Confirmer">${checkSvg('#fff')}</button></span></div>`).join('')}
             </div>` : ''}
-          ${ponctConfirmees.map(p => `<div class="row strong" data-row-id="${p.id}" style="color: var(--sauge-900); cursor:pointer;" onclick="openEditPonctuelle('${p.id}')"><span>${p.nom}${p.categorie ? ` <span style="opacity:0.6; font-weight:400; font-size:12px;">· ${p.categorie}</span>` : ''}</span><span class="row-right">${fmt(p.amount)}</span></div>`).join('')}
+          ${ponctConfirmees.map(p => `<div class="row strong" data-row-id="${p.id}" style="color: var(--sauge-900); cursor:pointer;" onclick="openEditPonctuelle('${p.id}')"><span>${p.nom}${p.categorie ? ` <span style="opacity:0.6; font-weight:400; font-size:12px;">· ${p.categorie}</span>` : ''}</span><span class="row-right">${fmt(p.amount)}${checkSvg('var(--muted)')}</span></div>`).join('')}
           ${ponctAVenir.map(p => `<div class="row muted" style="color: var(--sauge-900); cursor:pointer;" onclick="openEditPonctuelle('${p.id}')"><span>${calendarSvg('var(--muted)')}${p.nom}${p.categorie ? ` <span style="opacity:0.7;">· ${p.categorie}</span>` : ''}</span><span class="row-right">${fmt(p.amount)}<button class="confirm-btn early" onclick="event.stopPropagation(); confirmPonctuelle('${p.id}', this)" aria-label="Confirmer en avance">${checkSvg('currentColor')}</button></span></div>`).join('')}
           ${ponctuellesDuMois.length === 0 ? `<p style="font-size:12px; color: var(--sauge-900); opacity:0.6; margin:6px 0 0;">Aucune dépense ce mois-ci.</p>` : ''}
         </div>
@@ -2332,7 +2381,7 @@ function render() {
             const rolled = origMonth < m;
             return `<div class="row" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditRefund('${r.id}')"><span>${r.nom}${rolled ? ` <span style="opacity:0.6; font-size:11px;">· reporté</span>` : ''}</span><span class="row-right">+${fmt(r.amount)}<button class="confirm-btn" onclick="event.stopPropagation(); confirmRefund('${r.id}', this)" aria-label="Confirmer">${checkSvg('#fff')}</button></span></div>`;
           }).join('')}
-          ${confirmedRefundsThisMonth.map(r => `<div class="row strong" data-row-id="${r.id}" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditRefund('${r.id}')"><span>${r.nom}</span><span class="row-right">+${fmt(r.amount)}</span></div>`).join('')}
+          ${confirmedRefundsThisMonth.map(r => `<div class="row strong" data-row-id="${r.id}" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditRefund('${r.id}')"><span>${r.nom}</span><span class="row-right">+${fmt(r.amount)}${checkSvg('var(--muted)')}</span></div>`).join('')}
           ${refundsThisMonth.length === 0 ? `<p style="font-size:12px; color: var(--indigo-900); opacity:0.6; margin:6px 0 0;">Aucun remboursement ce mois-ci.</p>` : ''}
         </div>
       </div>
@@ -2424,6 +2473,19 @@ function render() {
       requestAnimationFrame(() => overlay.classList.add('entering'));
     }
   }
+
+  // Le contenu de chaque carte de la story (titre, texte, illustration) doit
+  // apparaître en douceur à chaque changement — y compris la toute première carte,
+  // sinon l'ouverture de la sheet s'arrête net avec tout le texte déjà plein cadre.
+  if (s.activeSheet === 'story' && s.storyIndex !== lastStoryIndex) {
+    const content = document.querySelector('.story-content');
+    if (content) {
+      content.classList.remove('card-in');
+      void content.offsetHeight;
+      requestAnimationFrame(() => content.classList.add('card-in'));
+    }
+  }
+  lastStoryIndex = s.activeSheet === 'story' ? s.storyIndex : -1;
 
   const soldeAfter = document.querySelector('.solde');
   if (soldeAfter && prevSoldeHeight !== null) {
@@ -2615,7 +2677,7 @@ function renderIncomeManageSheet(s, m) {
             <p class="label" style="color: var(--indigo-900);">À confirmer</p>
             ${recAConfirmer.map(d => `<div class="row" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditIncomeRec('${d.id}')"><span>${clockSvg('var(--alert)')}${d.nom}</span><span class="row-right">+${fmt(d.montant)}<button class="confirm-btn" onclick="event.stopPropagation(); confirmIncomeRec('${d.id}', this)" aria-label="Confirmer">${checkSvg('#fff')}</button></span></div>`).join('')}
           </div>` : ''}
-        ${recConfirmees.map(d => `<div class="row strong" data-row-id="${d.id}" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditIncomeRec('${d.id}')"><span>${d.nom}</span><span class="row-right">+${fmt(d.montant)}</span></div>`).join('')}
+        ${recConfirmees.map(d => `<div class="row strong" data-row-id="${d.id}" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditIncomeRec('${d.id}')"><span>${d.nom}</span><span class="row-right">+${fmt(d.montant)}${checkSvg('var(--muted)')}</span></div>`).join('')}
         ${recAVenir.map(d => `<div class="row muted" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditIncomeRec('${d.id}')"><span>${calendarSvg('var(--muted)')}${d.nom} · le ${effectiveJour(d, m)}</span><span class="row-right">+${fmt(d.montant)}<button class="confirm-btn early" onclick="event.stopPropagation(); confirmIncomeRec('${d.id}', this)" aria-label="Confirmer en avance">${checkSvg('currentColor')}</button></span></div>`).join('')}
         ${recActive.length === 0 ? `<p style="font-size:12px; color:var(--muted); margin:0;">Aucun revenu récurrent.</p>` : ''}
         </div>
@@ -2630,7 +2692,7 @@ function renderIncomeManageSheet(s, m) {
             <p class="label" style="color: var(--indigo-900);">À confirmer</p>
             ${ponAConfirmer.map(p => `<div class="row" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditIncomePonctuel('${p.id}')"><span>${clockSvg('var(--alert)')}${p.nom}</span><span class="row-right">+${fmt(p.amount)}<button class="confirm-btn" onclick="event.stopPropagation(); confirmIncomePonctuel('${p.id}', this)" aria-label="Confirmer">${checkSvg('#fff')}</button></span></div>`).join('')}
           </div>` : ''}
-        ${ponConfirmees.map(p => `<div class="row strong" data-row-id="${p.id}" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditIncomePonctuel('${p.id}')"><span>${p.nom}</span><span class="row-right">+${fmt(p.amount)}</span></div>`).join('')}
+        ${ponConfirmees.map(p => `<div class="row strong" data-row-id="${p.id}" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditIncomePonctuel('${p.id}')"><span>${p.nom}</span><span class="row-right">+${fmt(p.amount)}${checkSvg('var(--muted)')}</span></div>`).join('')}
         ${ponAVenir.map(p => `<div class="row muted" style="color: var(--indigo-900); cursor:pointer;" onclick="openEditIncomePonctuel('${p.id}')"><span>${calendarSvg('var(--muted)')}${p.nom}</span><span class="row-right">+${fmt(p.amount)}<button class="confirm-btn early" onclick="event.stopPropagation(); confirmIncomePonctuel('${p.id}', this)" aria-label="Confirmer en avance">${checkSvg('currentColor')}</button></span></div>`).join('')}
         ${ponDuMois.length === 0 ? `<p style="font-size:12px; color:var(--muted); margin:0;">Aucun revenu ponctuel ce mois-ci.</p>` : ''}
         </div>
@@ -2928,10 +2990,13 @@ function renderMonthSheet(s) {
         ${sheetHead(monthYearLabel(m), 'var(--indigo-200)', 'var(--indigo-900)')}
         <div class="sheet-body">
 
-          <p style="font-size:12px; color:var(--muted); margin:0 0 16px;">Du ${fmtD(b.from)} au ${fmtD(b.to)}${monthStartDay() > 1 ? ` · <span onclick="goProfileSub('monthStart')" style="text-decoration:underline; cursor:pointer;">modifier le découpage</span>` : ''}</p>
+          <div style="display:inline-flex; align-items:center; gap:6px; background:var(--indigo-200); color:var(--indigo-900); border-radius:20px; padding:6px 12px 6px 10px; font-size:12.5px; font-weight:600; margin-bottom:16px;">
+            ${calendarSvg('var(--indigo-900)')}<span>Période du ${fmtD(b.from)} au ${fmtD(b.to)}</span>
+          </div>
+          ${monthStartDay() > 1 ? `<p style="margin:-10px 0 16px;"><span onclick="goProfileSub('monthStart')" style="font-size:12px; text-decoration:underline; cursor:pointer; color:var(--muted);">modifier le découpage</span></p>` : ''}
 
           <p class="field-label" style="margin-top:0;">Solde du compte en début de période</p>
-          <p style="font-size:12px; color:var(--muted); margin:0 0 8px; line-height:1.5;">Sans lui, Monique ne peut afficher qu'un écart — ce qui rentre moins ce qui sort. Regarde ton relevé et saisis ce que tu avais le ${fmtD(b.from)} : le chiffre affiché deviendra ton vrai solde.</p>
+          <p style="font-size:12px; color:var(--muted); margin:0 0 8px; line-height:1.5;">Ajoute ton solde du ${fmtD(b.from)} pour préciser l'estimation.</p>
           <div class="amount-wrap"><input type="number" id="openingInput" class="big" placeholder="0"
                  value="${saisi ? s.openingBalances[m] : ''}"
                  oninput="setOpeningBalance(this.value)"><span class="amount-suffix">€</span></div>
@@ -2939,7 +3004,7 @@ function renderMonthSheet(s) {
             ? `<div class="edit-link" style="color:var(--alert); justify-content:flex-start;" onclick="clearOpeningBalance()">${xSvg()}<span>Retirer ce point de départ</span></div>`
             : (bal.ancre
                 ? `<p style="font-size:11.5px; color:var(--muted); margin:6px 0 0; line-height:1.5;">Repris du mois précédent : <strong>${fmt(bal.opening)}</strong>. Corrige-le si ton relevé diffère.</p>`
-                : `<p style="font-size:11.5px; color:var(--muted); margin:6px 0 0; line-height:1.5;">Pour l'instant, le chiffre en haut de l'accueil est cet écart, pas un vrai solde.</p>`)}
+                : `<p style="font-size:11.5px; color:var(--muted); margin:6px 0 0; line-height:1.5;">Sans lui, le chiffre en haut de l'accueil reste un écart, pas un solde.</p>`)}
 
           <div style="background:var(--indigo-200); border-radius:6px 18px 18px 18px; padding:14px 16px; margin:18px 0 6px;">
             <div style="display:flex; justify-content:space-between; font-size:12.5px; color:var(--indigo-900); padding:3px 0;">
@@ -2949,14 +3014,10 @@ function renderMonthSheet(s) {
               <span style="opacity:0.8;">Mouvements du mois</span><span style="font-weight:600;">${bal.mouvement >= 0 ? '+' : '−'}${fmt(Math.abs(bal.mouvement))}</span>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:baseline; border-top:1.5px solid rgba(28,46,66,0.25); margin-top:6px; padding-top:8px;">
-              <span style="font-size:13px; font-weight:600; color:var(--indigo-900);">${bal.ancre ? 'Solde estimé en fin de période' : 'Écart du mois'}</span>
+              <span style="font-size:13px; font-weight:600; color:var(--indigo-900);">Solde estimé en fin de période</span>
               <span style="font-family:'Bricolage Grotesque', sans-serif; font-weight:700; font-size:20px; color:var(--indigo-900);">${fmt(bal.total)}</span>
             </div>
           </div>
-
-          ${debutent.length ? `
-            <p class="field-label" style="margin-top:20px;">Ce qui commence ce mois-ci</p>
-            ${debutent.map(it => ligne(it, 'var(--ink)')).join('')}` : ''}
 
           ${finissent.length ? `
             <p class="field-label" style="margin-top:20px;">Se termine ce mois-ci</p>
@@ -2971,8 +3032,8 @@ function renderMonthSheet(s) {
                 <span>${p.nom}</span><span style="font-weight:600; color:var(--prune-900);">${fmt(dep)}</span></div>`;
             }).join('')}` : ''}
 
-          ${(!debutent.length && !finissent.length && !projetsDuMois.length)
-            ? `<p style="font-size:12px; color:var(--muted); margin-top:20px; line-height:1.5;">Rien ne commence ni ne se termine ce mois-ci.</p>` : ''}
+          ${(!finissent.length && !projetsDuMois.length)
+            ? `<p style="font-size:12px; color:var(--muted); margin-top:20px; line-height:1.5;">Rien ne se termine ce mois-ci.</p>` : ''}
 
           <div style="height:6px;"></div>
         </div>
@@ -3305,13 +3366,13 @@ function renderDrawerContent(m) {
     <p style="font-family:'Bricolage Grotesque', sans-serif; font-weight:700; font-size:28px; color:var(--terracotta-900); margin:0 0 14px;">${fmt(totalDep)}</p>
     ${dep.length === 0
       ? `<p style="font-size:12px; color:var(--muted); margin:0 0 22px;">Aucune dépense à venir.</p>`
-      : dep.map(it => `<div class="row" style="color:var(--ink);"><span>${rowIcon(it)}${dateShort(it.date)} · ${it.nom}</span><span class="row-right">${fmt(it.amount)}</span></div>`).join('') + '<div style="height:18px;"></div>'
+      : `<div class="drawer-card">${dep.map(it => `<div class="row" style="color:var(--ink);"><span>${rowIcon(it)}${dateShort(it.date)} · ${it.nom}</span><span class="row-right">${fmt(it.amount)}</span></div>`).join('')}</div><div style="height:18px;"></div>`
     }
     ${rev.length > 0 ? `
       <div style="border-top:1px solid rgba(32,30,29,0.12); margin-bottom:14px;"></div>
       <p style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.03em; margin:0 0 8px;">Revenus restants</p>
       <p style="font-family:'Bricolage Grotesque', sans-serif; font-weight:700; font-size:22px; color:var(--indigo-900); margin:0 0 14px;">+${fmt(totalRev)}</p>
-      ${rev.map(it => `<div class="row" style="color:var(--indigo-900);"><span>${rowIcon(it)}${dateShort(it.date)} · ${it.nom}</span><span class="row-right">+${fmt(it.amount)}</span></div>`).join('')}
+      <div class="drawer-card">${rev.map(it => `<div class="row" style="color:var(--indigo-900);"><span>${rowIcon(it)}${dateShort(it.date)} · ${it.nom}</span><span class="row-right">+${fmt(it.amount)}</span></div>`).join('')}</div>
     ` : ''}
     <div style="height:20px;"></div>`;
 }
@@ -3664,7 +3725,7 @@ function renderCategoryPicker(s) {
               <div class="cat-grid-circle">${cat.slice(0, 2).toUpperCase()}</div>
               <span style="font-size:12px;">${cat}</span>
             </div>`).join('')}
-          <div class="cat-grid-item" onclick="closeCategoryPicker(); addCategoryPrompt()">
+          <div class="cat-grid-item" onclick="closeWithFade(() => { setState({ categoryPickerFor: null }); addCategoryPrompt(); })">
             <div class="cat-grid-circle" style="background: transparent; border: 1.5px dashed var(--muted);">${plusSvg('var(--muted)')}</div>
             <span style="font-size:12px; color: var(--muted);">Créer</span>
           </div>
@@ -3857,8 +3918,18 @@ function onDrawerDragEnd(e) {
   state.year = CURRENT_YEAR;
 })();
 
-document.getElementById('screen').innerHTML = '';
 render();
+
+// Rituel d'ouverture : l'app est déjà prête sous le loader, mais on laisse volontairement
+// un temps d'arrêt avant de la révéler — sinon l'ouverture n'existe pas vraiment, le
+// tableau de bord est juste "déjà là" dès le premier instant.
+setTimeout(() => {
+  const loader = document.getElementById('initialLoader');
+  const screen = document.getElementById('screen');
+  if (loader) loader.classList.add('loader-leaving');
+  if (screen) screen.classList.add('app-opening');
+  setTimeout(() => { if (loader) loader.remove(); }, 420);
+}, 1400);
 </script>
 </body>
 </html>
