@@ -3962,8 +3962,8 @@ function renderProjectRow(s, p, lines) {
       </div>
       <div class="collapse ${isExpanded ? 'open' : ''}" data-collapse-env="${p.id}">
         <div class="envelope-body">
-          <div style="display:flex; align-items:center; gap:14px; padding-bottom:10px; flex-wrap:wrap;">
-            <div class="add-row" style="color: var(--prune-900);" onclick="openAddProjectLineFor('${p.id}')">${plusSvg('var(--prune-900)')}<span>Ajouter</span></div>
+          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:10px; padding-bottom:10px;">
+            <div class="add-row" style="color: var(--prune-900);" onclick="openAddProjectLineFor('${p.id}')">${plusSvg('var(--prune-900)')}<span>Ajouter une dépense</span></div>
             <div class="add-row-outline" style="color: var(--prune-900);" onclick="openAddProjectEnvelopeSheet('${p.id}')">${plusSvg('var(--prune-900)')}<span>Créer un budget</span></div>
           </div>
           ${(s.projectEnvelopeDefs || []).filter(e => e.projectId === p.id).map(env => {
